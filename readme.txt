@@ -1,4 +1,4 @@
-=== Old Post Promoter (OPP) ===
+=== Related Tweets ===
 Contributors: Blog Traffic Exchange (http://www.blogtrafficexchange.com)
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=1777819
 Tags: twitter, post, promotion, SEO, plugin, posts, bte
