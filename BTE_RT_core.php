@@ -17,9 +17,6 @@
 */
 require_once('BTE_RT_ge.php');
 require_once('RelatedTweets.php');
-if(! class_exists('EpiTwitter')) {
-	require_once('lib/twitter-async/EpiTwitter');
-}
 
 function bte_rt_related_tweets () {
 	if (bte_rt_update_time()) {
