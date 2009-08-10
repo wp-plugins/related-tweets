@@ -165,7 +165,7 @@ function bte_rt_tweet($tweet) {
 	$snoop->submit(
 		BTE_RT_API_POST_STATUS
 		, array(
-			'status' => $tweet
+			'status' => $tweet.' #RT'
 			, 'source' => 'Related Tweets'
 		)
 	);
