@@ -3,8 +3,8 @@ Contributors: Blog Traffic Exchange (http://www.blogtrafficexchange.com)
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=1777819
 Tags: twitter, post, promotion, SEO, plugin, posts, bte
 Requires at least: 2.5
-Tested up to: 2.8.3
-Stable tag: 1.2.1
+Tested up to: 2.8.4
+Stable tag: 1.2.2
 
 Using your blog as the seed, find quality content from the Blog Traffic Exchange and tweet it automatically.
 
