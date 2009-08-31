@@ -88,6 +88,8 @@ function bte_rt_options() {
 									<option value="'.BTE_RT_20_MINUTES.'" '.bte_rt_optionselected(BTE_RT_20_MINUTES,$interval).'>'.__('20 Minutes', 'RelatedTweets').'</option>
 									<option value="'.BTE_RT_30_MINUTES.'" '.bte_rt_optionselected(BTE_RT_30_MINUTES,$interval).'>'.__('30 Minutes', 'RelatedTweets').'</option>
 									<option value="'.BTE_RT_1_HOUR.'" '.bte_rt_optionselected(BTE_RT_1_HOUR,$interval).'>'.__('1 Hour', 'RelatedTweets').'</option>
+									<option value="'.BTE_RT_2_HOUR.'" '.bte_rt_optionselected(BTE_RT_2_HOUR,$interval).'>'.__('2 Hours', 'RelatedTweets').'</option>
+									<option value="'.BTE_RT_3_HOUR.'" '.bte_rt_optionselected(BTE_RT_3_HOUR,$interval).'>'.__('3 Hours', 'RelatedTweets').'</option>
 									<option value="'.BTE_RT_4_HOURS.'" '.bte_rt_optionselected(BTE_RT_4_HOURS,$interval).'>'.__('4 Hours', 'RelatedTweets').'</option>
 									<option value="'.BTE_RT_6_HOURS.'" '.bte_rt_optionselected(BTE_RT_6_HOURS,$interval).'>'.__('6 Hours', 'RelatedTweets').'</option>
 									<option value="'.BTE_RT_12_HOURS.'" '.bte_rt_optionselected(BTE_RT_12_HOURS,$interval).'>'.__('12 Hours', 'RelatedTweets').'</option>
@@ -103,7 +105,13 @@ function bte_rt_options() {
 									<option value="'.BTE_RT_20_MINUTES.'" '.bte_rt_optionselected(BTE_RT_20_MINUTES,$slop).'>'.__('Upto 20 Minutes', 'RelatedTweets').'</option>
 									<option value="'.BTE_RT_30_MINUTES.'" '.bte_rt_optionselected(BTE_RT_30_MINUTES,$slop).'>'.__('Upto 30 Minutes', 'RelatedTweets').'</option>
 									<option value="'.BTE_RT_1_HOUR.'" '.bte_rt_optionselected(BTE_RT_1_HOUR,$slop).'>'.__('Upto 1 Hour', 'RelatedTweets').'</option>
-							</select>
+									<option value="'.BTE_RT_2_HOUR.'" '.bte_rt_optionselected(BTE_RT_2_HOUR,$slop).'>'.__('Upto 2 Hours', 'RelatedTweets').'</option>
+									<option value="'.BTE_RT_3_HOUR.'" '.bte_rt_optionselected(BTE_RT_3_HOUR,$slop).'>'.__('Upto 3 Hours', 'RelatedTweets').'</option>
+									<option value="'.BTE_RT_4_HOURS.'" '.bte_rt_optionselected(BTE_RT_4_HOURS,$slop).'>'.__('Upto 4 Hours', 'RelatedTweets').'</option>
+									<option value="'.BTE_RT_6_HOURS.'" '.bte_rt_optionselected(BTE_RT_6_HOURS,$slop).'>'.__('Upto 6 Hours', 'RelatedTweets').'</option>
+									<option value="'.BTE_RT_12_HOURS.'" '.bte_rt_optionselected(BTE_RT_12_HOURS,$slop).'>'.__('Upto 12 Hours', 'RelatedTweets').'</option>
+									<option value="'.BTE_RT_24_HOURS.'" '.bte_rt_optionselected(BTE_RT_24_HOURS,$slop).'>'.__('Upto 24 Hours (1 day)', 'RelatedTweets').'</option>
+									</select>
 						</div>
 							<ul id="category-tabs"> 
         						<li class="ui-tabs-selected"><a href="#categories-all" 
