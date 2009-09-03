@@ -108,37 +108,58 @@ function bte_rt_get_tags($postMod, $ID, $guid, $title, $content, $cats, $tags) {
 
 
 function bte_rt_tweet_related_post($post) {
+	$user = get_option('bte_rt_twitter_username');
+	$pass = get_option('bte_rt_twitter_password');
+	if (empty($user) 
+		|| empty($pass) 
+	) {
+		return;
+	}
 	global $wpdb;
 	$post = get_post($post);
-	$wppost = array();
-	$wppost["site"] = get_option('siteurl');
-	$wppost["guid"] = $post->guid;
-	$wppost["tags"] = bte_rt_get_tags($postMod,$post->ID,$post->guid,$post->post_title,$post->post_content,explode(',',get_the_category()),explode(',',get_the_tags()));
-	$f=new xmlrpcmsg('bte.relatedtweet',
-		array(php_xmlrpc_encode($wppost))
-	);
-	$c=new xmlrpc_client(BTE_RT_XMLRPC, BTE_RT_XMLRPC_URI, 80);
-	if (BTE_RT_DEBUG) {
-		$c->setDebug(1);
-	}
-	$r=&$c->send($f);
-	if(!$r->faultCode()) {
-		$sno=$r->value();
-		if ($sno->kindOf()!="array") {
-			$err="Found non-array as parameter 0";
-		} else {
-			for($i=0; $i<$sno->arraysize(); $i++)
-			{
-				$rec=$sno->arraymem($i);
-				$tweet = $rec->structmem("tweet");
-				if ($tweet!=null) {
-					bte_rt_tweet($tweet->scalarval());
-				}	
-			}		
+	if (rand()%10==0) {//10% of the time 
+		$tags = bte_rt_get_tags($postMod,$post->ID,$post->guid,$post->post_title,$post->post_content,explode(',',get_the_category()),explode(',',get_the_tags()));
+		global $bte_rt_encoder;
+		if ($bte_rt_encoder==null)	{
+			$bte_rt_encoder = new BTE_RT_GE;
 		}
+		$tags = $bte_rt_encoder->Decode($tags,$post->guid);
+		$the_tags = explode(",",$tags);
+		array_splice($the_tags, 8);
+		shuffle($the_tags);
+		array_splice($the_tags, 3);
+		bte_rt_tweet_most_popular_twit($user,$pass,implode("+",$the_tags));
 	} else {
-		error_log("[".date('Y-m-d H:i:s')."][bte_rtplugin.updateContent] ".$post->guid." error code: ".htmlspecialchars($r->faultCode()));
-		error_log("[".date('Y-m-d H:i:s')."][bte_rtplugin.updateContent] ".$post->guid." reason: ".htmlspecialchars($r->faultString()));
+		$wppost = array();
+		$wppost["site"] = get_option('siteurl');
+		$wppost["guid"] = $post->guid;
+		$wppost["tags"] = bte_rt_get_tags($postMod,$post->ID,$post->guid,$post->post_title,$post->post_content,explode(',',get_the_category()),explode(',',get_the_tags()));
+		$f=new xmlrpcmsg('bte.relatedtweet',
+			array(php_xmlrpc_encode($wppost))
+		);
+		$c=new xmlrpc_client(BTE_RT_XMLRPC, BTE_RT_XMLRPC_URI, 80);
+		if (BTE_RT_DEBUG) {
+			$c->setDebug(1);
+		}
+		$r=&$c->send($f);
+		if(!$r->faultCode()) {
+			$sno=$r->value();
+			if ($sno->kindOf()!="array") {
+				$err="Found non-array as parameter 0";
+			} else {
+				for($i=0; $i<$sno->arraysize(); $i++)
+				{
+					$rec=$sno->arraymem($i);
+					$tweet = $rec->structmem("tweet");
+					if ($tweet!=null) {
+						bte_rt_tweet($tweet->scalarval());
+					}	
+				}		
+			}
+		} else if (BTE_RT_DEBUG) {
+			error_log("[".date('Y-m-d H:i:s')."][bte_rtplugin.updateContent] ".$post->guid." error code: ".htmlspecialchars($r->faultCode()));
+			error_log("[".date('Y-m-d H:i:s')."][bte_rtplugin.updateContent] ".$post->guid." reason: ".htmlspecialchars($r->faultString()));
+		}
 	}
 }
 
@@ -165,7 +186,7 @@ function bte_rt_tweet($tweet) {
 	$snoop->submit(
 		BTE_RT_API_POST_STATUS
 		, array(
-			'status' => $tweet.' #RTW'
+			'status' => $tweet
 			, 'source' => 'Related Tweets'
 		)
 	);
@@ -204,4 +225,83 @@ function bte_rt_update_time () {
 	}
 	return $ret;
 }
+
+function bte_rt_tweet_most_popular_twit($username, $password, $topic, $resultcount = 40) {
+	$retweets = json_decode(file_get_contents("http://search.twitter.com/search.json?q=from:$username+RT&rpp=100"));
+	$tweets = bte_rt_tweet_details("$topic+-RT", $resultcount);
+	$count = 0;
+	
+	// Find the tweet from the most popular twit that has not already been retweeted
+	foreach($tweets->results as $index => $tweet) {
+		if(
+			$tweet->user_data->friends_count > $count											// Check to see if we have a new max
+			&& !preg_match("/@[^\s]*/", $tweet->text)											// Make sure we aren't tweeting  			
+			&& !bte_rt_is_retweeted($tweet, $retweets)													// Make sure it hasn't been retweeted already
+		) {
+			// Set the new retweet and friends count
+			$new_retweet = $tweet;
+			$count = (int)$tweet->user_data->friends_count;
+		}
+	}
+	bte_rt_retweet($username,$password, $new_retweet);
+}
+
+function bte_rt_is_retweeted($tweet, $retweets) {
+	foreach($retweets as $retweet) {
+		if(bte_rt_retweet("","",$tweet,true) == bte_rt_retweet("","",$retweet,true))
+			return true;
+	}
+	return false;
+}
+
+function bte_rt_retweet($username, $password, $tweet, $textonly = false) {
+	if(!$tweet->from_user && !$tweet->text)
+		return;
+	
+	$message = "RT @" . $tweet->from_user . ": ";
+	if(preg_match("/http:\/\/[^\s$]*/", $tweet->text, $url)) {
+		$url = $url[0];
+		$tweet = preg_replace("/http:\/\/[^\s$]*/", "", $tweet->text);
+		$message .= $tweet;
+		$message = substr($message, 0, 137-strlen($url));
+		if(strlen($message) == 137-strlen($url))
+			$message .= "..";
+		$message .= " $url";
+	}
+	else {
+		$message .= $tweet->text;
+		$message = substr($message, 0, 140);
+	}
+	
+	// Remove extra spaces
+	$message = preg_replace("/\s{2,}/", " ", $message);
+	
+	bte_rt_tweet($message);
+}
+
+function bte_rt_tweet_details($topic, $tweet_count = 100) {
+	$count = 0;
+	$mh = curl_multi_init();
+	$topic = urlencode(preg_replace("/\s/", "+", $topic));
+	$tweets = @json_decode(file_get_contents("http://search.twitter.com/search.json?q=$topic&rpp=$tweet_count"));
+
+	foreach($tweets->results as $index => $tweet) {
+		$tweets->results[$index]->user_url = "http://twitter.com/users/show/" . $tweet->from_user;
+		$tweets->results[$index]->ch = curl_init();
+		curl_setopt($tweets->results[$index]->ch, CURLOPT_URL, $tweets->results[$index]->user_url);
+		curl_setopt($tweets->results[$index]->ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_multi_add_handle($mh, $tweets->results[$index]->ch);
+	}
+	$running=null;
+	//execute the handles
+	do {
+		curl_multi_exec($mh,$running);
+	} while($running > 0);
+	
+	foreach($tweets->results as $index => $tweet) {
+		$tweets->results[$index]->user_data = @simplexml_load_string(curl_multi_getcontent($tweets->results[$index]->ch));
+	}
+	return $tweets;
+}
+
 ?>
