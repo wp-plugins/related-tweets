@@ -276,7 +276,8 @@ function bte_rt_retweet($username, $password, $tweet, $textonly = false) {
 	// Remove extra spaces
 	$message = preg_replace("/\s{2,}/", " ", $message);
 	
-	bte_rt_tweet($message);
+	if(!$textonly)
+		bte_rt_tweet($message);
 }
 
 function bte_rt_tweet_details($topic, $tweet_count = 100) {
