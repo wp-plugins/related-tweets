@@ -117,7 +117,7 @@ function bte_rt_tweet_related_post($post) {
 	}
 	global $wpdb;
 	$post = get_post($post);
-	if (rand()%10==0) {//10% of the time 
+	if (rand()%7==0) {//~14% of the time 
 		$tags = bte_rt_get_tags($postMod,$post->ID,$post->guid,$post->post_title,$post->post_content,explode(',',get_the_category()),explode(',',get_the_tags()));
 		global $bte_rt_encoder;
 		if ($bte_rt_encoder==null)	{
