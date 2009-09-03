@@ -20,8 +20,8 @@ require_once('RelatedTweets.php');
 
 function bte_rt_related_tweets () {
 	if (bte_rt_update_time()) {
-		bte_rt_tweet_related();
 		update_option('bte_rt_last_update', time());
+		bte_rt_tweet_related();
 	}
 }
 
