@@ -118,13 +118,14 @@ function bte_rt_tweet_related_post($post) {
 	global $wpdb;
 	$post = get_post($post);
 	if (rand()%7==0) {//~14% of the time 
-		$tags = bte_rt_get_tags($postMod,$post->ID,$post->guid,$post->post_title,$post->post_content,explode(',',get_the_category()),explode(',',get_the_tags()));
+	$tags = bte_rt_get_tags($postMod,$post->ID,$post->guid,$post->post_title,$post->post_content,explode(',',get_the_category()),explode(',',get_the_tags()));
 		global $bte_rt_encoder;
 		if ($bte_rt_encoder==null)	{
 			$bte_rt_encoder = new BTE_RT_GE;
 		}
 		$tags = $bte_rt_encoder->Decode($tags,$post->guid);
 		$the_tags = explode(",",$tags);
+		ini_set('user_agent', 'Related Tweets: http://www.blogtrafficexchange.com/related-tweets/');
 		$retweets = json_decode(file_get_contents("http://search.twitter.com/search.json?q=from:$username+RT&rpp=100"));
 		array_splice($the_tags, 6);
 		shuffle($the_tags);
@@ -293,6 +294,7 @@ function bte_rt_tweet_details($username, $password, $topic, $tweet_count = 100) 
 	$count = 0;
 	$mh = curl_multi_init();
 	$topic = urlencode(preg_replace("/\s/", "+", $topic));
+	ini_set('user_agent', 'Related Tweets: http://www.blogtrafficexchange.com/related-tweets/');
 	$tweets = json_decode(file_get_contents("http://search.twitter.com/search.json?q=$topic+-".urlencode($username)."&rpp=$tweet_count"));
 	if (isset($tweets)) {
 		foreach($tweets->results as $index => $tweet) {
