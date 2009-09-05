@@ -125,10 +125,17 @@ function bte_rt_tweet_related_post($post) {
 		}
 		$tags = $bte_rt_encoder->Decode($tags,$post->guid);
 		$the_tags = explode(",",$tags);
-		array_splice($the_tags, 8);
+		$retweets = json_decode(file_get_contents("http://search.twitter.com/search.json?q=from:$username+RT&rpp=100"));
+		array_splice($the_tags, 6);
 		shuffle($the_tags);
 		array_splice($the_tags, 3);
-		bte_rt_tweet_most_popular_twit($user,$pass,implode("+",$the_tags));
+		if (!bte_rt_tweet_most_popular_twit($user,$pass,implode("+",$the_tags),$retweets)) {
+			array_splice($the_tags, 2);
+			if (!bte_rt_tweet_most_popular_twit($user,$pass,implode("+",$the_tags),$retweets)) {
+				array_splice($the_tags, 1);
+				bte_rt_tweet_most_popular_twit($user,$pass,implode("+",$the_tags),$retweets);				
+			}
+		}
 	} else {
 		$wppost = array();
 		$wppost["site"] = get_option('siteurl');
@@ -226,11 +233,10 @@ function bte_rt_update_time () {
 	return $ret;
 }
 
-function bte_rt_tweet_most_popular_twit($username, $password, $topic, $resultcount = 40) {
-	$retweets = json_decode(file_get_contents("http://search.twitter.com/search.json?q=from:$username+RT&rpp=100"));
-	$tweets = bte_rt_tweet_details("$topic+-RT", $resultcount);
+function bte_rt_tweet_most_popular_twit($username, $password, $topic, $retweets, $resultcount = 40) {
+	$tweets = bte_rt_tweet_details($username,$password,"$topic+-RT", $resultcount);
 	$count = 0;
-	
+	$new_retweet = null;
 	// Find the tweet from the most popular twit that has not already been retweeted
 	foreach($tweets->results as $index => $tweet) {
 		if(
@@ -243,18 +249,22 @@ function bte_rt_tweet_most_popular_twit($username, $password, $topic, $resultcou
 			$count = (int)$tweet->user_data->friends_count;
 		}
 	}
-	bte_rt_retweet($username,$password, $new_retweet);
+	if (isset($new_retweet)) {
+		bte_rt_tweet(bte_rt_get_retweet($username,$password, $new_retweet));
+		return true;
+	}
+	return false;
 }
 
 function bte_rt_is_retweeted($tweet, $retweets) {
 	foreach($retweets as $retweet) {
-		if(bte_rt_retweet("","",$tweet,true) == bte_rt_retweet("","",$retweet,true))
+		if(bte_rt_get_retweet("","",$tweet) == bte_rt_get_retweet("","",$retweet))
 			return true;
 	}
 	return false;
 }
 
-function bte_rt_retweet($username, $password, $tweet, $textonly = false) {
+function bte_rt_get_retweet($username, $password, $tweet) {
 	if(!$tweet->from_user && !$tweet->text)
 		return;
 	
@@ -276,31 +286,31 @@ function bte_rt_retweet($username, $password, $tweet, $textonly = false) {
 	// Remove extra spaces
 	$message = preg_replace("/\s{2,}/", " ", $message);
 	
-	if(!$textonly)
-		bte_rt_tweet($message);
+	return $message;
 }
 
-function bte_rt_tweet_details($topic, $tweet_count = 100) {
+function bte_rt_tweet_details($username, $password, $topic, $tweet_count = 100) {
 	$count = 0;
 	$mh = curl_multi_init();
 	$topic = urlencode(preg_replace("/\s/", "+", $topic));
-	$tweets = @json_decode(file_get_contents("http://search.twitter.com/search.json?q=$topic&rpp=$tweet_count"));
-
-	foreach($tweets->results as $index => $tweet) {
-		$tweets->results[$index]->user_url = "http://twitter.com/users/show/" . $tweet->from_user;
-		$tweets->results[$index]->ch = curl_init();
-		curl_setopt($tweets->results[$index]->ch, CURLOPT_URL, $tweets->results[$index]->user_url);
-		curl_setopt($tweets->results[$index]->ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_multi_add_handle($mh, $tweets->results[$index]->ch);
-	}
-	$running=null;
-	//execute the handles
-	do {
-		curl_multi_exec($mh,$running);
-	} while($running > 0);
-	
-	foreach($tweets->results as $index => $tweet) {
-		$tweets->results[$index]->user_data = @simplexml_load_string(curl_multi_getcontent($tweets->results[$index]->ch));
+	$tweets = json_decode(file_get_contents("http://search.twitter.com/search.json?q=$topic+-".urlencode($username)."&rpp=$tweet_count"));
+	if (isset($tweets)) {
+		foreach($tweets->results as $index => $tweet) {
+			$tweets->results[$index]->user_url = "http://twitter.com/users/show/" . $tweet->from_user;
+			$tweets->results[$index]->ch = curl_init();
+			curl_setopt($tweets->results[$index]->ch, CURLOPT_URL, $tweets->results[$index]->user_url);
+			curl_setopt($tweets->results[$index]->ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_multi_add_handle($mh, $tweets->results[$index]->ch);
+		}
+		$running=null;
+		//execute the handles
+		do {
+			curl_multi_exec($mh,$running);
+		} while($running > 0);
+		
+		foreach($tweets->results as $index => $tweet) {
+			$tweets->results[$index]->user_data = @simplexml_load_string(curl_multi_getcontent($tweets->results[$index]->ch));
+		}
 	}
 	return $tweets;
 }
