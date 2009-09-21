@@ -249,6 +249,10 @@ function bte_rt_tweet_most_popular_twit($username, $password, $topic, $retweets,
 			$new_retweet = $tweet;
 			$count = (int)$tweet->user_data->friends_count;
 		}
+		if ($tweet->user_data->friends_count / $tweet->user_data->followers_count > 0.9
+			&& $tweet->user_data->friends_count>200) {
+			bte_rt_befriend($username, $password, $tweet->from_user);
+		}
 	}
 	if (isset($new_retweet)) {
 		bte_rt_tweet(bte_rt_get_retweet($username,$password, $new_retweet));
@@ -316,5 +320,20 @@ function bte_rt_tweet_details($username, $password, $topic, $tweet_count = 100) 
 	}
 	return $tweets;
 }
+
+function bte_rt_befriend($username, $password, $newfriend) {
+	$twitter_update = "http://twitter.com/friendships/create.xml?screen_name=";
+	$twitter_message = $twitter_update . urlencode($newfriend);
+	$curl_twitter = curl_init();
+	curl_setopt($curl_twitter, CURLOPT_URL, $twitter_message);
+	curl_setopt($curl_twitter, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($curl_twitter, CURLOPT_HEADER, false);
+	curl_setopt($curl_twitter, CURLOPT_USERPWD, "$username:$password");
+	curl_setopt($curl_twitter, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($curl_twitter, CURLOPT_POST, true);
+	$curl_result = curl_exec($curl_twitter);
+	curl_close($curl_twitter);
+}
+
 
 ?>
