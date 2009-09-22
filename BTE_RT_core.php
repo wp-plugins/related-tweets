@@ -325,6 +325,7 @@ function bte_rt_befriend($username, $password, $newfriend) {
 	$twitter_update = "http://twitter.com/friendships/create.xml?screen_name=";
 	$twitter_message = $twitter_update . urlencode($newfriend);
 	$curl_twitter = curl_init();
+	ini_set('user_agent', 'Related Tweets: http://www.blogtrafficexchange.com/related-tweets/');
 	curl_setopt($curl_twitter, CURLOPT_URL, $twitter_message);
 	curl_setopt($curl_twitter, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	curl_setopt($curl_twitter, CURLOPT_HEADER, false);
