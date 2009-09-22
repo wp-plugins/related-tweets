@@ -235,7 +235,7 @@ function bte_rt_update_time () {
 }
 
 function bte_rt_tweet_most_popular_twit($username, $password, $topic, $retweets, $resultcount = 40) {
-	$tweets = bte_rt_tweet_details($username,$password,"$topic+-RT", $resultcount);
+	$tweets = bte_rt_tweet_details($username,$password,"$topic+-RT+-porn+-dick+-cock+-nipple+-boobs+-tits+-sex+-shit+-fuck+-cunt", $resultcount);
 	$count = 0;
 	$new_retweet = null;
 	// Find the tweet from the most popular twit that has not already been retweeted
