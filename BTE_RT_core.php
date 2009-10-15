@@ -249,8 +249,7 @@ function bte_rt_tweet_most_popular_twit($username, $password, $topic, $retweets,
 			$new_retweet = $tweet;
 			$count = (int)$tweet->user_data->friends_count;
 		}
-		if ($tweet->user_data->friends_count / $tweet->user_data->followers_count > 0.9
-			&& $tweet->user_data->friends_count>200) {
+		if (get_option('bte_rt_befriend') && $tweet->user_data->followers_count>200 && $tweet->user_data->friends_count>200 && $tweet->user_data->friends_count / $tweet->user_data->followers_count > 0.9) {
 			bte_rt_befriend($username, $password, $tweet->from_user);
 		}
 	}

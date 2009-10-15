@@ -43,6 +43,9 @@ function bte_rt_options() {
 		if (isset($_POST['bte_rt_interval_slop'])) {
 			update_option('bte_rt_interval_slop',$_POST['bte_rt_interval_slop']);
 		}
+		if (isset($_POST['bte_rt_befriend'])) {
+			update_option('bte_rt_befriend',$_POST['bte_rt_befriend']);
+		}
 		if (isset($_POST['post_category'])) {
 			update_option('bte_rt_omit_cats',implode(',',$_POST['post_category']));
 		}
@@ -65,6 +68,8 @@ function bte_rt_options() {
 	if (!(isset($interval) && is_numeric($interval))) {
 		$interval = BTE_RT_INTERVAL;
 	}
+	$befriend = get_option('bte_rt_befriend');		
+
 	$slop = get_option('bte_rt_interval_slop');		
 	if (!(isset($slop) && is_numeric($slop))) {
 		$slop = BTE_RT_INTERVAL_SLOP;
@@ -113,7 +118,14 @@ function bte_rt_options() {
 									<option value="'.BTE_RT_24_HOURS.'" '.bte_rt_optionselected(BTE_RT_24_HOURS,$slop).'>'.__('Upto 24 Hours (1 day)', 'RelatedTweets').'</option>
 									</select>
 						</div>
-							<ul id="category-tabs"> 
+						<div class="option">
+							<label for="bte_rt_befriend">'.__('Befriend Tweets with follow back properties? ', 'RelatedTweets').'</label>
+							<select name="bte_rt_befriend" id="bte_rw_admin_notice">
+									<option value="0" '.bte_rt_optionselected(0,$befriend).'>'.__('No', 'RelatedTweets').'</option>
+									<option value="1" '.bte_rt_optionselected(1,$befriend).'>'.__('Yes', 'RelatedTweets').'</option>
+							</select>
+						</div>
+						<ul id="category-tabs"> 
         						<li class="ui-tabs-selected"><a href="#categories-all" 
 									tabindex="3">'.__('Categories to Omit from Tweeting: ', 'RelatedTweets').'</a></li> 
 							</ul> 
