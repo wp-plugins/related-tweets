@@ -3,7 +3,7 @@
 Plugin Name: Related Tweets (by BTE)
 Plugin URI: http://www.blogtrafficexchange.com/related-tweets
 Description: Randomly choose a post from the blog.  Search for related websites & posts via the Blog Traffic Exchange and tweet the most relevant related post.  Automatically adding hashtags <a href="options-general.php?page=BTE_RT_admin.php">Configuration options are here.</a>  
-Version: 1.5.3
+Version: 1.5.4
 Author: Blog Traffic Exchange
 Author URI: http://www.blogtrafficexchange.com/
 Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=1777819
