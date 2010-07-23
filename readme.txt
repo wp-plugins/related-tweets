@@ -3,8 +3,8 @@ Contributors: Blog Traffic Exchange (http://www.blogtrafficexchange.com)
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=1777819
 Tags: twitter, post, promotion, SEO, plugin, posts, bte
 Requires at least: 2.5
-Tested up to: 2.9.2
-Stable tag: 1.5.5
+Tested up to: 3.0
+Stable tag: 1.5.6
 
 Using your blog as the seed, find quality content from the Blog Traffic Exchange and tweet it automatically.
 
@@ -14,7 +14,7 @@ Using your blog as the seed, find quality content from the Blog Traffic Exchange
 
 [Related Tweets](http://www.blogtrafficexchange.com/related-tweets "Related Tweets") by [Blog Traffic Exchange](http://www.blogtrafficexchange.com/ "Blog Traffic Exchange")
 
-Want to have your blog content be used by others for tweeting?  If you blog meets the [Blog Traffic Exchange](http://www.blogtrafficexchange.com/about "Blog Traffic Exchange terms of service") join the [Blog Traffic Exchange](http://www.blogtrafficexchange.com/ "Blog Traffic Exchange") by installing, activating, and obtaining an API key for the [Related Websites](http://www.blogtrafficexchange.com/related-websites "Related Websites") plugin.
+Want to have your blog content be used by others for tweeting?  If you blog meets the [Blog Traffic Exchange terms of service](http://www.blogtrafficexchange.com/about "Blog Traffic Exchange terms of service").  Join by installing, activating, and obtaining an API key for the [Related Websites](http://www.blogtrafficexchange.com/related-websites "Related Websites") plugin.
 
 Check out my other [Wordpress Plugins](http://www.blogtrafficexchange.com/wordpress-plugins "Wordpress Plugins")
 
@@ -38,9 +38,11 @@ If you blog meets the [Blog Traffic Exchange](http://www.blogtrafficexchange.com
 
 [Related Websites](http://www.blogtrafficexchange.com/related-websites "Related Websites")
 [Related Tweets](http://www.blogtrafficexchange.com/related-tweets "Related Tweets")
-[Old Post Promoter](http://www.blogtrafficexchange.com/old-post-promoter "Old Post Promoter")
+[Blog Post Promoter](http://www.blogtrafficexchange.com/old-post-promoter "Blog Post Promoter")
 [Wordpress Backup](http://www.blogtrafficexchange.com/wordpress-backup "Wordpress Backup")
 [Blog Copyright](http://www.blogtrafficexchange.com/blogcopyright "Blog Copyright")
 [Related Posts](http://www.blogtrafficexchange.com/related-posts "Related Posts")
+[Online Stores](http://www.blogtrafficexchange.com/online-stores "Online Stores")
+[Click to Call](http://www.blogtrafficexchange.com/click-to-call "Click to Call")
 
 I am working on several others, when released you will find them on my [Wordpress Plugins](http://www.blogtrafficexchange.com/wordpress-plugins "Wordpress Plugins") page.
