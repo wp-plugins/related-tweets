@@ -108,13 +108,19 @@ function bte_rt_get_tags($postMod, $ID, $guid, $title, $content, $cats, $tags) {
 
 
 function bte_rt_tweet_related_post($post) {
-	$user = get_option('bte_rt_twitter_username');
-	$pass = get_option('bte_rt_twitter_password');
-	if (empty($user) 
-		|| empty($pass) 
+	$consumer_key = get_option('bte_rt_twitter_consumer_key');
+	$consumer_secret = get_option('bte_rt_twitter_consumer_secret');
+	$oauth_token = get_option('bte_rt_twitter_oauth_token');
+	$oauth_secret = get_option('bte_rt_twitter_oauth_secret');
+	
+	if (empty($consumer_key) 
+		|| empty($consumer_secret) 
+		|| empty($oauth_token) 
+		|| empty($oauth_secret) 
 	) {
-		return;
+		return 0;
 	}
+	
 	global $wpdb;
 	$post = get_post($post);
 	if (rand()%7==0) {//~14% of the time 
@@ -167,38 +173,46 @@ function bte_rt_tweet_related_post($post) {
 		} else if (BTE_RT_DEBUG) {
 			error_log("[".date('Y-m-d H:i:s')."][bte_rtplugin.updateContent] ".$post->guid." error code: ".htmlspecialchars($r->faultCode()));
 			error_log("[".date('Y-m-d H:i:s')."][bte_rtplugin.updateContent] ".$post->guid." reason: ".htmlspecialchars($r->faultString()));
+			echo("[".date('Y-m-d H:i:s')."][bte_rtplugin.updateContent] ".$post->guid." error code: ".htmlspecialchars($r->faultCode()));
+			echo("[".date('Y-m-d H:i:s')."][bte_rtplugin.updateContent] ".$post->guid." reason: ".htmlspecialchars($r->faultString()));
 		}
 	}
 }
 
+
 function bte_rt_tweet($tweet) {
-	$user = get_option('bte_rt_twitter_username');
-	$pass = get_option('bte_rt_twitter_password');
-	if (empty($user) 
-		|| empty($pass) 
+	$consumer_key = get_option('bte_rt_twitter_consumer_key');
+	$consumer_secret = get_option('bte_rt_twitter_consumer_secret');
+	$oauth_token = get_option('bte_rt_twitter_oauth_token');
+	$oauth_secret = get_option('bte_rt_twitter_oauth_secret');
+	
+	if (empty($consumer_key) 
+		|| empty($consumer_secret) 
+		|| empty($oauth_token) 
+		|| empty($oauth_secret) 
 		|| empty($tweet)
 	) {
 		return;
 	}
-	//I guess I am supposed to do this with OAuth but that seems way to hard given the nature of plugins
-	require_once(ABSPATH.WPINC.'/class-snoopy.php');
-	$snoop = new Snoopy;
-	$snoop->agent = 'Related Tweets http://www.blogtrafficexchange.com/related-tweets';
-	$snoop->rawheaders = array(
-		'X-Twitter-Client' => 'Related Tweets'
-		, 'X-Twitter-Client-Version' => BTE_RT_VERSION
-		, 'X-Twitter-Client-URL' => 'http://www.blogtrafficexchange.com/related-tweets.xml'
-	);
-	$snoop->user = $user;
-	$snoop->pass = $pass;
-	$snoop->submit(
+	
+	require_once('twitteroauth.php');
+	$connection = new TwitterOAuth(
+			$consumer_key, 
+			$consumer_secret, 
+			$oauth_token, 
+			$oauth_secret
+		);
+	$connection->useragent = 'Related Tweets http://www.blogtrafficexchange.com/related-tweets/';
+	
+	$connection->post(
 		BTE_RT_API_POST_STATUS
 		, array(
 			'status' => $tweet
 			, 'source' => 'Related Tweets'
 		)
 	);
-	if (strpos($snoop->response_code, '200')) {
+	
+	if (strcmp($connection->http_code, '200') == 0) {
 		return true;
 	}
 	return false;
@@ -206,15 +220,22 @@ function bte_rt_tweet($tweet) {
 
 
 function bte_rt_update_time () {
-	if (BTE_RT_DEBUG) {
-		return 1;
-	}
-	$user = get_option('bte_rt_twitter_username');		
-	$pass = get_option('bte_rt_twitter_password');		
-	if (empty($user) 
-		|| empty($pass) 
+	$consumer_key = get_option('bte_rt_twitter_consumer_key');
+	$consumer_secret = get_option('bte_rt_twitter_consumer_secret');
+	$oauth_token = get_option('bte_rt_twitter_oauth_token');
+	$oauth_secret = get_option('bte_rt_twitter_oauth_secret');
+	
+	if (empty($consumer_key) 
+		|| empty($consumer_secret) 
+		|| empty($oauth_token) 
+		|| empty($oauth_secret) 
 	) {
 		return 0;
+	}
+	
+	if (BTE_RT_DEBUG) {
+		echo '<h1>Update Time</h1>';
+		return 1;
 	}
 	
 	$last = get_option('bte_rt_last_update');		
@@ -234,8 +255,14 @@ function bte_rt_update_time () {
 	return $ret;
 }
 
+function bte_rt_issafe($tweet) {
+	$pattern = '/(porn|dick|cock|nipple|boobs|tits|sex|shit|fuck|cunt)/';
+	return !preg_match($pattern,$tweet);
+}
+
 function bte_rt_tweet_most_popular_twit($username, $password, $topic, $retweets, $resultcount = 40) {
-	$tweets = bte_rt_tweet_details($username,$password,"$topic+-RT+-porn+-dick+-cock+-nipple+-boobs+-tits+-sex+-shit+-fuck+-cunt", $resultcount);
+	//$tweets = bte_rt_tweet_details($username,$password,"$topic+-RT+-porn+-dick+-cock+-nipple+-boobs+-tits+-sex+-shit+-fuck+-cunt", $resultcount);
+	$tweets = bte_rt_tweet_details($username,$password,"$topic+-RT", $resultcount);
 	$count = 0;
 	$new_retweet = null;
 	// Find the tweet from the most popular twit that has not already been retweeted
@@ -243,7 +270,9 @@ function bte_rt_tweet_most_popular_twit($username, $password, $topic, $retweets,
 		if(
 			$tweet->user_data->friends_count > $count											// Check to see if we have a new max
 			&& !preg_match("/@[^\s]*/", $tweet->text)											// Make sure we aren't tweeting  			
-			&& !bte_rt_is_retweeted($tweet, $retweets)													// Make sure it hasn't been retweeted already
+			&& !bte_rt_is_retweeted($tweet, $retweets)
+			&& bte_rt_issafe($tweet->text)
+			// Make sure it hasn't been retweeted already
 		) {
 			// Set the new retweet and friends count
 			$new_retweet = $tweet;
@@ -321,6 +350,7 @@ function bte_rt_tweet_details($username, $password, $topic, $tweet_count = 100) 
 }
 
 function bte_rt_befriend($username, $password, $newfriend) {
+	/* Disabled until can be fixed to work with oauth
 	$twitter_update = "http://twitter.com/friendships/create.xml?screen_name=";
 	$twitter_message = $twitter_update . urlencode($newfriend);
 	$curl_twitter = curl_init();
@@ -332,8 +362,7 @@ function bte_rt_befriend($username, $password, $newfriend) {
 	curl_setopt($curl_twitter, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($curl_twitter, CURLOPT_POST, true);
 	$curl_result = curl_exec($curl_twitter);
-	curl_close($curl_twitter);
+	curl_close($curl_twitter);*/
 }
-
 
 ?>
