@@ -123,8 +123,15 @@ function bte_rt_tweet_related_post($post) {
 	
 	global $wpdb;
 	$post = get_post($post);
-	if (rand()%7==0) {//~14% of the time 
-	$tags = bte_rt_get_tags($postMod,$post->ID,$post->guid,$post->post_title,$post->post_content,explode(',',get_the_category()),explode(',',get_the_tags()));
+	$givecredit = get_option('bte_rt_give_credit');
+	if (!isset($givecredit)) {
+		$givecredit = 1;
+	}
+	if ($givecredit && rand()%999==0) {//~.01% of the time 
+		$tweet = "Related Tweets http://bte.tc/b8E supplements this stream with relevant tweets";
+		bte_rt_tweet($tweet);
+	} else if (rand()%7==0) {//~14% of the time 
+		$tags = bte_rt_get_tags($postMod,$post->ID,$post->guid,$post->post_title,$post->post_content,explode(',',get_the_category()),explode(',',get_the_tags()));
 		global $bte_rt_encoder;
 		if ($bte_rt_encoder==null)	{
 			$bte_rt_encoder = new BTE_RT_GE;

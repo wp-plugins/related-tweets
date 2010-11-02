@@ -171,6 +171,8 @@ function bte_rt_options() {
 	wp_category_checklist(0, 0, explode(',',$omitCats));
 	print('				    		</ul>
 								<div>
+								
+								
 					</fieldset>
 					<p class="submit">
 						<input type="submit" name="submit" value="'.__('Update Related Tweets Options', 'RelatedTweets').'" />
